@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
+import dlib
 
 
-class Preprocessing:
+class Feature_Extraction:
     '''
     Preprocessing class responsible for extracting the 
     dft of image and its azimuthal integral
@@ -100,3 +101,47 @@ class Preprocessing:
         
         return azi_integ
 
+
+def video_feature_extraction(video_capture, vector_list, video_number):
+    '''
+    Extract the average azimuthal integrations for the whole video
+    ## Args
+        - video_capture: The video frames
+        - vector_list: Feature vector list used by function to append the result vector
+    '''
+    # print the number of the current video
+    print("Video {}".format(video_number))
+
+    detector = dlib.get_frontal_face_detector()
+    feature_ext = Feature_Extraction()
+
+    # Video frames vectors
+    video_frames_vectors = []
+
+    # Returns true if video capturing has been initialized already.
+    while video_capture.isOpened():
+        # read the video frame by frame
+        ret, frame = video_capture.read()
+        if ret != True:
+            break
+
+        face_rects, scores, idx = detector.run(frame, 0)
+        for i, d in enumerate(face_rects):
+            x1 = d.left()
+            y1 = d.top()
+            x2 = d.right()
+            y2 = d.bottom()
+
+            crop_img = frame[y1:y2, x1:x2]
+            if crop_img is not None and crop_img.size > 0:
+                crop_img = cv2.resize(crop_img, (128, 128))
+                # calculate dft of an image
+                azi_line = feature_ext.fit(crop_img)
+                video_frames_vectors.append(azi_line)
+                break
+
+    # return the mean vector that represent the whole video
+    vector_list.append(np.array(video_frames_vectors).mean(axis=0))
+    
+    # finishing the thread
+    print("Video {} ---- Done".format(video_number))
