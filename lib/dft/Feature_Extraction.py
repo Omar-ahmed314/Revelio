@@ -1,6 +1,10 @@
 import cv2
 import numpy as np
 import dlib
+from scipy import fft
+from scipy.interpolate import griddata
+from numba import jit
+import matplotlib.pyplot as plt
 
 
 class Feature_Extraction:
@@ -20,7 +24,8 @@ class Feature_Extraction:
         '''
         image_dft = self.dft(image)
         image_azimuthal_integration_line = self.azimuthal_integration(image_dft)
-        return image_azimuthal_integration_line
+        azi_integ = self.line_interpolate(image_azimuthal_integration_line)
+        return azi_integ
     
     def line_interpolate(self, azi_line_integration, fixed_line_size = 300):
         '''
@@ -53,15 +58,19 @@ class Feature_Extraction:
         ## Returns
             - The normalized magnitude of the set of image frequencies
         '''
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+
         # Compute the discrete Fourier Transform of the image
-        fourier = cv2.dft(np.float32(gray), flags=cv2.DFT_COMPLEX_OUTPUT)
+        # TODO try to fix this in another time
+        # fourier = cv2.dft(np.float32(gray), flags=cv2.DFT_COMPLEX_OUTPUT)
+
+        fourier = fft.fft2(gray)
 
         # Shift the zero-frequency component to the center of the spectrum
-        fourier_shift = np.fft.fftshift(fourier)
+        fourier_shift = fft.fftshift(fourier)
 
         # calculate the magnitude of the Fourier Transform
-        magnitude = 20*np.log(cv2.magnitude(fourier_shift[:,:,0],fourier_shift[:,:,1]) + 1)
+        magnitude = 20 * np.log(np.abs(fourier_shift) + 1)
 
         return magnitude
 
@@ -79,27 +88,85 @@ class Feature_Extraction:
         shift_row_idx, shift_col_idx = k // 2, l // 2
         
         # get the minimum dimension
-        m = min(k, l)
+        m = np.sqrt(shift_row_idx ** 2 + shift_col_idx ** 2).astype(int)
+
+        BIN_RESOLUTION = 5
 
         # initialize the azimuthal integration array
-        azi_integ = np.zeros(m // 2)
+        azi_integ = np.zeros(m)
 
-        for wk in range(m // 2):
-            current_theta_integration = 0
-            theta = np.linspace(0, 2 * np.pi, 100)
+        for wk in range(m):
+            theta = np.linspace(0, 2 * np.pi, wk * BIN_RESOLUTION) if wk != 0 else 0
             r = np.array(shift_row_idx + wk * np.sin(theta)).astype(int)
             c = np.array(shift_col_idx + wk * np.cos(theta)).astype(int)
-            current_theta_integration = np.array(np.square(freq_scale[r, c])).sum()
-            azi_integ[wk] = current_theta_integration
 
-        
+            # validate rows and columns
+            r = np.where((r < k) & (r >= 0), r, -1)
+            c = np.where((c < l) & (c >= 0), c, -1)
+
+            # get only valid cells
+            valid_freq = np.where((r == -1) | (c == -1), 0, freq_scale[r, c])
+            
+            azi_integ[wk] = np.array(valid_freq).sum()
+
         # line normalization
-        azi_integ /= azi_integ[0]
-        
-        # line interpolation to fixed size
-        azi_integ = self.line_interpolate(azi_integ)
-        
+        # normalization = np.array([wk * BIN_RESOLUTION + 1 for wk in range(m)])
+
         return azi_integ
+    
+    def azimuthal_integration_v2(self, freq_scale):
+        '''
+        The function azimuthal_integration calculate the radial/azimuthal power along 2D 
+        spatial frequencies grid using this formula 
+        AI(Wk) = integration 0 -> 2*Pi (f(wk * cos(phi), wk * sin(phi))), where phi is the azimuthal degree
+        ## Args
+            - freq_scale: The frequency domain of the image
+        ## Return
+            - Azimuthal integration values along wk 0 -> inf
+        '''
+        # Indices for the each pixel in the image
+        y, x = np.indices(freq_scale.shape)
+
+        height, width = np.asarray(freq_scale).shape
+        shift_row_idx, shift_col_idx = height // 2, width // 2
+
+        radius = np.hypot(x - shift_col_idx, y - shift_row_idx)
+
+        sorted_indices = np.argsort(radius.flat)
+        sorted_radius = radius.flat[sorted_indices].astype(int)
+        sorted_pixels = freq_scale.flat[sorted_indices]
+
+        # Find all pixels that fall within each radial bin.
+        delta_r = sorted_radius[1:] - sorted_radius[:-1]
+        difference_index = np.where(delta_r)[0]
+        nr = difference_index[1:] - difference_index[:-1]
+        
+        # Cumulative sum to figure out sums for each radius bin
+        pixels_cumsum = np.cumsum(sorted_pixels, dtype=float)
+        bin_sum = pixels_cumsum[difference_index[1:]] - pixels_cumsum[difference_index[:-1]]
+
+
+        return bin_sum / nr
+    
+    def show_dft(self, dft_image):
+        plt.imshow(dft_image, cmap='gray')
+        plt.show()
+
+
+def detect_face(frame):
+    detector = dlib.get_frontal_face_detector()
+    face_rects, _, _ = detector.run(frame, 0)
+    for i, d in enumerate(face_rects):
+        x1 = d.left()
+        y1 = d.top()
+        x2 = d.right()
+        y2 = d.bottom()
+
+        crop_img = frame[y1:y2, x1:x2]
+        # if crop_img is not None and crop_img.size > 0:
+        #     crop_img = cv2.resize(crop_img, (128, 128))
+        
+        return crop_img
 
 
 def video_feature_extraction(video_capture, vector_list, video_number):
@@ -112,7 +179,6 @@ def video_feature_extraction(video_capture, vector_list, video_number):
     # print the number of the current video
     print("Video {}".format(video_number))
 
-    detector = dlib.get_frontal_face_detector()
     feature_ext = Feature_Extraction()
 
     # Video frames vectors
@@ -124,21 +190,10 @@ def video_feature_extraction(video_capture, vector_list, video_number):
         ret, frame = video_capture.read()
         if ret != True:
             break
-
-        face_rects, scores, idx = detector.run(frame, 0)
-        for i, d in enumerate(face_rects):
-            x1 = d.left()
-            y1 = d.top()
-            x2 = d.right()
-            y2 = d.bottom()
-
-            crop_img = frame[y1:y2, x1:x2]
-            if crop_img is not None and crop_img.size > 0:
-                crop_img = cv2.resize(crop_img, (128, 128))
-                # calculate dft of an image
-                azi_line = feature_ext.fit(crop_img)
-                video_frames_vectors.append(azi_line)
-                break
+        
+        crop_img = detect_face(frame)
+        azi_line = feature_ext.fit(crop_img)
+        video_frames_vectors.append(azi_line)
 
     # return the mean vector that represent the whole video
     vector_list.append(np.array(video_frames_vectors).mean(axis=0))
