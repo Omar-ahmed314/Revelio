@@ -23,7 +23,7 @@ class Feature_Extraction:
             - image azimuthal integration line
         '''
         image_dft = self.dft(image)
-        image_azimuthal_integration_line = self.azimuthal_integration(image_dft)
+        image_azimuthal_integration_line = self.azimuthal_integration_v2(image_dft)
         azi_integ = self.line_interpolate(image_azimuthal_integration_line)
         return azi_integ
     
@@ -40,10 +40,10 @@ class Feature_Extraction:
         '''
         # old line
         azi_line_size = len(azi_line_integration)
-        x_old = np.linspace(0, 1, azi_line_size)
+        x_old = np.linspace(0, fixed_line_size, azi_line_size)
 
         # new interpolated line
-        x_new = np.linspace(0, 1, fixed_line_size)
+        x_new = np.linspace(0, fixed_line_size, fixed_line_size)
         y_new = np.interp(x_new, x_old, azi_line_integration)
 
         return y_new
@@ -96,9 +96,10 @@ class Feature_Extraction:
         azi_integ = np.zeros(m)
 
         for wk in range(m):
-            theta = np.linspace(0, 2 * np.pi, wk * BIN_RESOLUTION) if wk != 0 else 0
-            r = np.array(shift_row_idx + wk * np.sin(theta)).astype(int)
-            c = np.array(shift_col_idx + wk * np.cos(theta)).astype(int)
+            theta = np.linspace(0, 2 * np.pi, wk * BIN_RESOLUTION)
+
+            r = (shift_row_idx + wk * np.sin(theta)).astype(int)
+            c = (shift_col_idx + wk * np.cos(theta)).astype(int)
 
             # validate rows and columns
             r = np.where((r < k) & (r >= 0), r, -1)
@@ -184,13 +185,15 @@ def video_feature_extraction(video_capture, vector_list, video_number):
     # Video frames vectors
     video_frames_vectors = []
 
+    # Read number of frames
+    num_frames = 25
     # Returns true if video capturing has been initialized already.
-    while video_capture.isOpened():
+    while video_capture.isOpened() and num_frames != 0:
         # read the video frame by frame
         ret, frame = video_capture.read()
         if ret != True:
             break
-        
+        num_frames -= 1
         crop_img = detect_face(frame)
         azi_line = feature_ext.fit(crop_img)
         video_frames_vectors.append(azi_line)
