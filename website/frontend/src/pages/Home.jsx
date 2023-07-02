@@ -7,7 +7,9 @@ const Home = () => {
     return (
         <>
         <div className="home_body">
-            <section className="background"></section>
+            <section className="background">
+                <canvas id="canvas1"></canvas>
+            </section>
             <section className="page_content">
                 <section className="page_header">
                     <ul>
