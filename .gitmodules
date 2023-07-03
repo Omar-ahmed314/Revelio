@@ -1,0 +1,15 @@
+[submodule "Revelio-LipsMovement"]
+	path = Revelio-LipsMovement
+	url = https://github.com/AmmarMohamed21/Revelio-LipsMovement
+[submodule "Facial-Landmarks-Detector"]
+	path = Facial-Landmarks-Detector
+	url = https://github.com/AmmarMohamed21/Facial-Landmarks-Detector
+[submodule "SBI2"]
+	path = SBI2
+	url = https://github.com/mohamed99akram/SBI2
+[submodule "FaceDetection"]
+	path = FaceDetection
+	url = https://github.com/mohamed99akram/FaceDetection
+[submodule "Dynamic-texture-analysis-for-detecting-fake-faces-in-video-sequences"]
+	path = Dynamic-texture-analysis-for-detecting-fake-faces-in-video-sequences
+	url = https://github.com/ahmedayman1420/Dynamic-texture-analysis-for-detecting-fake-faces-in-video-sequences
