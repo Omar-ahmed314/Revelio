@@ -7,20 +7,22 @@
     --spinning-speed-1: 1s;
     --spinning-speed-2: 4s;
     --spinning-speed-3: 6s;
+    --popup-window-width: 500px;
+    --popup-window-height: 400px
+}
+
+a {
+    cursor: pointer;
 }
 
 /* Downloaded fonts */
 
 .home_body {
+    /* background-color: aliceblue; */
     position: relative;
     width: 100vw;
     height: 100vh;
-    background-color: var(--background-color);
 }
-
-
-/* background shapes */
-
 
 /* Page content */
 .page_content {
@@ -65,9 +67,6 @@
     font-family: 'Orbitron';
 }
 
-.intro_words {
-    /* background-color: aliceblue; */
-}
 
 /* --------- revelio word css ----------- */
 #revelio_word {
@@ -132,7 +131,6 @@
 
 /* ---------- buttons css ------------- */
 .intro_btns a {
-    /* margin: 10%; */
     text-decoration: none;
     color: white;
     font-family: 'Orbitron';

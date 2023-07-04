@@ -1,15 +1,14 @@
-import { useState } from "react";
-import {Link} from 'react-router-dom'
+import { useState } from 'react'
 import '../styles/Home/Home.css'
+import DragAndDrop from '../components/drag_drop'
 
 const Home = () => {
-
+    const [isPopupActive, setPopupActive] = useState(false)
     return (
         <>
         <div className="home_body">
-            <section className="background">
-                <canvas id="canvas1"></canvas>
-            </section>
+            <section className="background"></section>
+            {isPopupActive ? <DragAndDrop activateWindow={{isPopupActive, setPopupActive}}/> : undefined}
             <section className="page_content">
                 <section className="page_header">
                     <ul>
@@ -24,7 +23,7 @@ const Home = () => {
                     </div>
                 </section>
                 <section className="intro_btns">
-                    <a href="/">GET STARTED</a>
+                    <a onClick={() => setPopupActive(true)}>GET STARTED</a>
                 </section>
             </section>
         </div>
