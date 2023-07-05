@@ -30,13 +30,13 @@ const DragAndDrop = ({activateWindow}) => {
     const fileDroped = (event) => {
         event.preventDefault()
         const file = event.dataTransfer.files[0]
-        readFileURL(file, (data) => sendFile(data))
+        readFileURL(file, (data) => uploadFile(data))
     }
 
     const fileChosen = (event) => {
         event.preventDefault()
         const file = event.target.files[0]
-        readFileURL(file, (data) => sendFile(data))
+        readFileURL(file, (data) => uploadFile(data))
     }
 
     const readFileURL = (file, callback) => {
@@ -47,9 +47,9 @@ const DragAndDrop = ({activateWindow}) => {
         fileReader.readAsArrayBuffer(file)
     }
 
-    const sendFile = async (fileArrayBuffer) => {
+    const uploadFile = async (fileArrayBuffer) => {
         const fileSize = fileArrayBuffer.byteLength
-        const CHUNK_SIZE = 1024
+        const CHUNK_SIZE = 1024 * 100
         const chunkCount = Math.ceil(fileSize / CHUNK_SIZE)
 
         for(let chunkNum = 0; chunkNum < chunkCount; chunkNum++) {
@@ -74,6 +74,19 @@ const DragAndDrop = ({activateWindow}) => {
             } catch (err) {
 
             }
+        }
+        await analyzeData()
+    }
+
+    const analyzeData = async () => {
+        try {
+            // send the current chunk into the backend
+            const response = await axios.get(`${config.url}:${config.port}/analyze`)
+            
+            console.log(response?.data)
+
+        } catch (err) {
+
         }
     }
 
