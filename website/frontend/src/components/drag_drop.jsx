@@ -5,11 +5,13 @@ const DragAndDrop = ({activateWindow}) => {
     const [isDraged, setDraged] = useState(false)
     const dragDropContainer = useRef(null)
     const dragDropArea = useRef(null)
+    const fileButton = useRef(null)
 
     useEffect(() => {
         dragDropArea.current.addEventListener('dragover', fileDragedOver)
         dragDropArea.current.addEventListener('dragleave', fileDragedReleased)
         dragDropArea.current.addEventListener('drop', fileDroped)
+        fileButton.current.addEventListener('change', fileChosen)
     }, [])
 
     const fileDragedOver = (event) => {
@@ -26,10 +28,24 @@ const DragAndDrop = ({activateWindow}) => {
     const fileDroped = (event) => {
         event.preventDefault()
         const file = event.dataTransfer.files[0]
+        readFileURL(file, (ev) => alert(ev))
     }
 
-    const readFileURL = (file) => {
+    const fileChosen = (event) => {
+        event.preventDefault()
+        const file = event.target.files[0]
+        readFileURL(file, () => alert('file chosen'))
+    }
+
+    const readFileURL = (file, callback) => {
         const fileReader = new FileReader()
+        fileReader.onload = () => {
+            callback(fileReader.result)
+        }
+        fileReader.readAsArrayBuffer(file)
+    }
+
+    const sendFile = (fileArrayBuffer) => {
         
     }
 
@@ -45,7 +61,7 @@ const DragAndDrop = ({activateWindow}) => {
                         {isDraged ? (<p>Release the file</p>) : 
                         (<p>DRAG & DROP <br/>OR 
                             <label htmlFor='upload_video'> UPLOAD</label>
-                            <input id='upload_video' type='file' hidden/>
+                            <input id='upload_video' type='file' ref={fileButton} hidden/>
                         </p>)
                         }
                     </div>
