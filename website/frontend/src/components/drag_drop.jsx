@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import '../styles/Drag_Drop.css'
+import config from '../config'
+import axios from 'axios'
 
 const DragAndDrop = ({activateWindow}) => {
     const [isDraged, setDraged] = useState(false)
@@ -28,13 +30,13 @@ const DragAndDrop = ({activateWindow}) => {
     const fileDroped = (event) => {
         event.preventDefault()
         const file = event.dataTransfer.files[0]
-        readFileURL(file, (ev) => alert(ev))
+        readFileURL(file, (data) => sendFile(data))
     }
 
     const fileChosen = (event) => {
         event.preventDefault()
         const file = event.target.files[0]
-        readFileURL(file, () => alert('file chosen'))
+        readFileURL(file, (data) => sendFile(data))
     }
 
     const readFileURL = (file, callback) => {
@@ -45,8 +47,34 @@ const DragAndDrop = ({activateWindow}) => {
         fileReader.readAsArrayBuffer(file)
     }
 
-    const sendFile = (fileArrayBuffer) => {
-        
+    const sendFile = async (fileArrayBuffer) => {
+        const fileSize = fileArrayBuffer.byteLength
+        const CHUNK_SIZE = 1024
+        const chunkCount = Math.ceil(fileSize / CHUNK_SIZE)
+
+        for(let chunkNum = 0; chunkNum < chunkCount; chunkNum++) {
+            const startIdx = chunkNum * CHUNK_SIZE
+            const endIdx = startIdx + CHUNK_SIZE
+            const currentChunk = fileArrayBuffer?.slice(startIdx, endIdx)
+
+            try {
+                // send the current chunk into the backend
+                const response = await axios.post(`${config.url}:${config.port}/upload`, 
+                currentChunk,
+                {
+                    headers: {'Content-Type': 'application/octet-stream'}
+                })
+                
+                console.log(response?.data)
+                // if success call on progress callback function
+                const progress = Math.round((chunkNum + 1) * 100 / chunkCount, 0)
+                // onProgressCallback(progress)
+                console.log(progress);
+
+            } catch (err) {
+
+            }
+        }
     }
 
     return (
