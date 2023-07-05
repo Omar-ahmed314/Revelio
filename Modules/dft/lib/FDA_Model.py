@@ -33,17 +33,21 @@ class FDA:
 
         # initialize voting vector
         votes_vectors = {
-            'deepfake'      : 0,
-            'face2face'     : 0,
-            'faceswap'      : 0,
-            'neuraltextures': 0
+            'deepfake'      : -1,
+            'face2face'     : -1,
+            'faceswap'      : -1,
+            'neuraltextures': -1
         }
 
         while video_capture.isOpened():
             # read the video frame by frame
-            frame = video_capture.read()
+            ret, frame = video_capture.read()
+            if ret != True:
+                break
             # extract the feature vector
             azi_line = feature_extraction.fit(frame)
+            # reshape the line
+            azi_line = azi_line.reshape((1, -1))
             # model inference
             result_vectors['deepfake'].append(self.deepfake_model.predict(azi_line))
             result_vectors['face2face'].append(self.face2face_model.predict(azi_line))
@@ -54,8 +58,8 @@ class FDA:
         frames_size = len(result_vectors['deepfake'])
 
         for model_name in result_vectors.keys():
-            total_voting = np.array(result_vectors[model_name]).sum()
-            voting_result = 1 if total_voting > frames_size // 2 else 0
+            total_voting = np.array(result_vectors[model_name]).flatten().sum()
+            voting_result = 1 if total_voting > (frames_size // 2) else 0
             votes_vectors[model_name] = voting_result
 
-        return voting_result
+        return votes_vectors

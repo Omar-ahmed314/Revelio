@@ -58,7 +58,7 @@ class Feature_Extraction:
         ## Returns
             - The normalized magnitude of the set of image frequencies
         '''
-        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         # Compute the discrete Fourier Transform of the image
         # TODO try to fix this in another time
