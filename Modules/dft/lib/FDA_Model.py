@@ -4,8 +4,8 @@ from Feature_Extraction import *
 
 class FDA:
     
-    def __init__(self):
-        self.model_path = '../Models'
+    def __init__(self, model_path = '../Models'):
+        self.model_path = model_path
         
         with open(self.model_path + '/deepfake_model.pkl', 'rb') as file:
             self.deepfake_model = pickle.load(file)
@@ -19,7 +19,7 @@ class FDA:
         with open(self.model_path + '/neuraltextures_model.pkl', 'rb') as file:
             self.neuraltextures_model = pickle.load(file)
 
-    def predict(self, video_capture):
+    def predict(self, inputGrayFrames):
         # initiate feature extraction model
         feature_extraction = Feature_Extraction()
 
@@ -41,12 +41,7 @@ class FDA:
             'neuraltextures': -1
         }
 
-        while video_capture.isOpened():
-            # read the video frame by frame
-            ret, frame = video_capture.read()
-            if ret != True:
-                break
-            face = detect_face(frame)
+        for face in inputGrayFrames:
             # extract the feature vector
             azi_line = feature_extraction.fit(face)
             total_frames_vector.append(azi_line)
