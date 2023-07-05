@@ -31,6 +31,8 @@ class FDA:
             'neuraltextures': []
         }
 
+        total_frames_vector = []
+
         # initialize voting vector
         votes_vectors = {
             'deepfake'      : -1,
@@ -44,21 +46,21 @@ class FDA:
             ret, frame = video_capture.read()
             if ret != True:
                 break
+            face = detect_face(frame)
             # extract the feature vector
-            azi_line = feature_extraction.fit(frame)
-            # reshape the line
-            azi_line = azi_line.reshape((1, -1))
-            # model inference
-            result_vectors['deepfake'].append(self.deepfake_model.predict(azi_line))
-            result_vectors['face2face'].append(self.face2face_model.predict(azi_line))
-            result_vectors['faceswap'].append(self.faceswap_model.predict(azi_line))
-            result_vectors['neuraltextures'].append(self.neuraltextures_model.predict(azi_line))
+            azi_line = feature_extraction.fit(face)
+            total_frames_vector.append(azi_line)
+        
+        result_vectors['deepfake']  = self.deepfake_model.predict(total_frames_vector)
+        result_vectors['face2face'] = self.face2face_model.predict(total_frames_vector)
+        result_vectors['faceswap']  = self.faceswap_model.predict(total_frames_vector)
+        result_vectors['neuraltextures'] = self.neuraltextures_model.predict(total_frames_vector)
 
         # frames number
         frames_size = len(result_vectors['deepfake'])
 
         for model_name in result_vectors.keys():
-            total_voting = np.array(result_vectors[model_name]).flatten().sum()
+            total_voting = np.array(result_vectors[model_name]).sum()
             voting_result = 1 if total_voting > (frames_size // 2) else 0
             votes_vectors[model_name] = voting_result
 
