@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import '../styles/Drag_Drop.css'
 import config from '../config'
 import axios from 'axios'
@@ -10,6 +11,7 @@ const DragAndDrop = ({activateWindow}) => {
     const dragDropContainer = useRef(null)
     const dragDropArea = useRef(null)
     const fileButton = useRef(null)
+    const navigate = useNavigate()
 
     useEffect(() => {
         dragDropArea.current?.addEventListener('dragover', fileDragedOver)
@@ -78,6 +80,10 @@ const DragAndDrop = ({activateWindow}) => {
 
             }
         }
+
+        // after finishing uploading the file
+        // navigate to the analysis page
+        navigate('/analyze')
     }
 
     return (
