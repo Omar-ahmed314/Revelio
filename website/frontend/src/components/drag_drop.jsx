@@ -5,15 +5,17 @@ import axios from 'axios'
 
 const DragAndDrop = ({activateWindow}) => {
     const [isDraged, setDraged] = useState(false)
+    const [isLoading, setLoading] = useState(false) 
+    const [loadingPercentage, setLoadingPercentage] = useState(0)
     const dragDropContainer = useRef(null)
     const dragDropArea = useRef(null)
     const fileButton = useRef(null)
 
     useEffect(() => {
-        dragDropArea.current.addEventListener('dragover', fileDragedOver)
-        dragDropArea.current.addEventListener('dragleave', fileDragedReleased)
-        dragDropArea.current.addEventListener('drop', fileDroped)
-        fileButton.current.addEventListener('change', fileChosen)
+        dragDropArea.current?.addEventListener('dragover', fileDragedOver)
+        dragDropArea.current?.addEventListener('dragleave', fileDragedReleased)
+        dragDropArea.current?.addEventListener('drop', fileDroped)
+        fileButton.current?.addEventListener('change', fileChosen)
     }, [])
 
     const fileDragedOver = (event) => {
@@ -30,24 +32,25 @@ const DragAndDrop = ({activateWindow}) => {
     const fileDroped = (event) => {
         event.preventDefault()
         const file = event.dataTransfer.files[0]
-        readFileURL(file, (data) => uploadFile(data))
+        readFileURL(file, (data, fileName) => uploadFile(data, fileName))
     }
 
     const fileChosen = (event) => {
         event.preventDefault()
         const file = event.target.files[0]
-        readFileURL(file, (data) => uploadFile(data))
+        readFileURL(file, (data, fileName) => uploadFile(data, fileName))
     }
 
     const readFileURL = (file, callback) => {
         const fileReader = new FileReader()
         fileReader.onload = () => {
-            callback(fileReader.result)
+            callback(fileReader.result, file.name)
         }
         fileReader.readAsArrayBuffer(file)
     }
 
-    const uploadFile = async (fileArrayBuffer) => {
+    const uploadFile = async (fileArrayBuffer, fileName) => {
+        setLoading(true)
         const fileSize = fileArrayBuffer.byteLength
         const CHUNK_SIZE = 1024 * 100
         const chunkCount = Math.ceil(fileSize / CHUNK_SIZE)
@@ -62,31 +65,18 @@ const DragAndDrop = ({activateWindow}) => {
                 const response = await axios.post(`${config.url}:${config.port}/upload`, 
                 currentChunk,
                 {
-                    headers: {'Content-Type': 'application/octet-stream'}
+                    headers: {'Content-Type': 'application/octet-stream',
+                                'File-Name': fileName}
                 })
                 
-                console.log(response?.data)
                 // if success call on progress callback function
                 const progress = Math.round((chunkNum + 1) * 100 / chunkCount, 0)
                 // onProgressCallback(progress)
-                console.log(progress);
+                setLoadingPercentage(progress)
 
             } catch (err) {
 
             }
-        }
-        await analyzeData()
-    }
-
-    const analyzeData = async () => {
-        try {
-            // send the current chunk into the backend
-            const response = await axios.get(`${config.url}:${config.port}/analyze`)
-            
-            console.log(response?.data)
-
-        } catch (err) {
-
         }
     }
 
@@ -99,11 +89,20 @@ const DragAndDrop = ({activateWindow}) => {
                         <button className="close_btn" onClick={() => activateWindow?.setPopupActive(false)}></button>
                     </div>
                     <div className="dragdrop" ref={dragDropArea}>
-                        {isDraged ? (<p>Release the file</p>) : 
-                        (<p>DRAG & DROP <br/>OR 
-                            <label htmlFor='upload_video'> UPLOAD</label>
-                            <input id='upload_video' type='file' ref={fileButton} hidden/>
-                        </p>)
+                        { !isLoading ? 
+                        <div className="dragdrop-text">
+                            {isDraged ? (<p>Release the file</p>) : 
+                            (<p>DRAG & DROP <br/>OR 
+                                <label htmlFor='upload_video'> UPLOAD</label>
+                                <input id='upload_video' type='file' ref={fileButton} hidden/>
+                            </p>)
+                            }
+                        </div>
+                        :
+                        <div className="loading_container">
+                            <span>LOADING</span>
+                            <progress value={loadingPercentage} max={100}>{loadingPercentage}%</progress>
+                        </div>
                         }
                     </div>
                 </div>

@@ -118,3 +118,35 @@
     background-color: rgb(24, 58, 47);
     /* color: brown; */
 }
+
+/* loading container */
+.loading_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    /* background-color: aquamarine; */
+    width: 50%;
+}
+
+.loading_container span {
+    margin: 2%;
+    color: aquamarine;
+    font-family: 'Orbitron';
+    animation: loading 1s ease-in infinite;
+}
+
+.loading_container progress {
+    width: 100%;
+    /* background-color: aquamarine; */
+}
+
+@keyframes loading {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
