@@ -1,11 +1,22 @@
 import sys
-sys.path.append('./utils/')
+sys.path.append('../../Facial-Landmarks-Detector/')
+sys.path.append('../../Revelio-LipsMovement/')
+sys.path.append('../../Dynamic-texture-analysis-for-detecting-fake-faces-in-video-sequences/')
+sys.path.append('../../Modules/dft/lib/')
+sys.path.append('../../SBI2/')
+sys.path.append('../../FaceDetection/')
+sys.path.append('utils/')
 from flask import Flask, render_template, request
 from flask_cors import CORS
-from utils import JobsStatus
 import time
+from enum import Enum
 import json
 from threading import Thread
+from revelio import *
+
+class JobsStatus(Enum):
+    RUNNING = 1
+    FINISHED = 2
 
 # initialize the application
 app = Flask(__name__)
@@ -36,14 +47,17 @@ def upload():
         
     return 'Successfully Uploaded'
 
-@app.route('/analyze', methods=['POST'])
+@app.route('/analyze', methods=['GET'])
 def analyze():
     job_id = int(time.time())
     current_jobs[job_id] = JobsStatus.RUNNING
     response_body = {
         'job_id': job_id
     }
-    t1 = Thread(target=run_process, args=(job_id,))
+    filename = request.args.get('filename')
+    print('testttttt')
+    print(filename)
+    t1 = Thread(target=run_process, args=(job_id,filename))
     t1.start()
     return json.dumps(response_body)
 
@@ -57,12 +71,13 @@ def getAnalysis():
     data = {'status': 'running', 'data': 0}
     return json.dumps(data)
 
-def run_process(job_id):
-    print('start job')
-    time.sleep(10)
+def run_process(job_id, filename):
+    print('start joooob')
+    print(filename)
+    revelioAnalysis = Revelio().analyze_video(filename)
     print('end job')
     current_jobs[job_id] = JobsStatus.FINISHED
-
+    current_jobs_results[job_id] = revelioAnalysis
 
 if __name__ == '__main__':
     app.run(port=8080)

@@ -2,9 +2,9 @@ import cv2
 import numpy as np
 import dlib
 from scipy import fft
-from scipy.interpolate import griddata
-from numba import jit
-import matplotlib.pyplot as plt
+# from scipy.interpolate import griddata
+#from numba import jit
+#import matplotlib.pyplot as plt
 
 
 class Feature_Extraction:
@@ -153,9 +153,9 @@ class Feature_Extraction:
 
         return bin_sum / nr
     
-    def show_dft(self, dft_image):
-        plt.imshow(dft_image, cmap='gray')
-        plt.show()
+    # def show_dft(self, dft_image):
+    #     plt.imshow(dft_image, cmap='gray')
+    #     plt.show()
 
 
 def detect_face(frame):

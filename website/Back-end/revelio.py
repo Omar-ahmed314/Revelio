@@ -7,24 +7,27 @@ sys.path.append('../../Modules/dft/lib/')
 sys.path.append('../../SBI2/')
 sys.path.append('../../FaceDetection/')
 import cv2
-from matplotlib import pyplot as plt
 import dlib
 from landmarks_detector import *
 from LipMovementClassifier import *
 from FDA_Model import *
-from DynamicTexture import *
+from DynamicTexturePredictor import *
 from sbi_inference import *
 from detect_face import *
 import numpy as np
 import joblib
 import json
+import torch
 
 class Revelio():
     def __init__(self):
         pass
 
-    def __read_video_frames(self,videoCapture):
+    def __read_video_frames(self,filename):
         #read frames
+        print("FILEEEE")
+        print(filename)
+        videoCapture = cv2.VideoCapture(filename)
         grayFrames = []
         coloredFrames = []
         while True:
@@ -36,10 +39,13 @@ class Revelio():
                 grayFrames.append(frame)
             else:
                 break
+        print("Frames read successfully")
+        print(len(grayFrames))
+        print(len(coloredFrames))
         return grayFrames, coloredFrames
 
     def __initialize_face_detector(self):
-        face_detector = joblib.load('../../FaceDetection/hFeatures6/faceDetector2.joblib')
+        face_detector = joblib.load('../../FaceDetection/hFeatures6/cascadeClassifier.joblib')
         all_classifiers = face_detector.classifier.strong_classifiers[0].weak_classifiers
         face_detector.classifier.strong_classifiers[0].weak_classifiers = all_classifiers[:80]
         face_detector.classifier.strong_classifiers[0].θ = np.sum(face_detector.classifier.strong_classifiers[0].alphas)/2
@@ -70,15 +76,15 @@ class Revelio():
         return region
 
     def __get_face_frames(self,face_detector, grayFrames, coloredFrames):
-        #detector = dlib.get_frontal_face_detector()
+        detector = dlib.get_frontal_face_detector()
         faceFrames = []
         coloredFaceFrames = []
         for i in range(len(grayFrames)):
             frame = grayFrames[i]
             coloredFrame = coloredFrames[i]
-            #face = detector(frame)[0]
-            #x1, y1, x2, y2 = face.left(), face.top(), face.right(), face.bottom()
-            x1,y1,x2,y2 = self.__detect_face_region(face_detector, frame)
+            face = detector(frame)[0]
+            x1, y1, x2, y2 = face.left(), face.top(), face.right(), face.bottom()
+            #x1,y1,x2,y2 = self.__detect_face_region(face_detector, frame)
 
             faceFrames.append(frame[y1:y2, x1:x2])
             coloredFaceFrames.append(coloredFrame[y1:y2, x1:x2])
@@ -137,16 +143,16 @@ class Revelio():
         }
         return json.dumps(resultmap)
 
-    def analyze_video(self, videoCapture):
+    def analyze_video(self, filename):
         #read video frames
         print('Reading video frames...')
-        grayFrames, coloredFrames = self.__read_video_frames(videoCapture)
+        grayFrames, coloredFrames = self.__read_video_frames(filename)
 
         print('Detecting face region...')
         #initialize face detector 
-        face_detector = self.__initialize_face_detector()
+        #face_detector = self.__initialize_face_detector()
         #detect and crop face region
-        faceFrames, coloredFaceFrames = self.__get_face_frames(face_detector, grayFrames, coloredFrames)
+        faceFrames, coloredFaceFrames = self.__get_face_frames(None, grayFrames, coloredFrames)
         
         print('Detecting landmarks...')
         #detect landmarks
@@ -160,6 +166,7 @@ class Revelio():
         #Lips Movement Analysis 
         lipsMovementModel = self.__initializeLipsMovementModel()
         allLipsPredictions = lipsMovementModel.predict(faceFrames, framesLandmarks)
+        torch.cuda.empty_cache()
 
         print('Frequency Domain Analysis...')
         #Frequency Domain Analysis
@@ -176,6 +183,6 @@ class Revelio():
         print('SBI Analysis...')
         #SBI Analysis
         sbimodel = SBI_inference('../../SBI2/36_0.9899_val.tar')
-        sbiPredictions = self.__sbi_analysis(sbimodel, 32, coloredFaceFrames)
+        sbiPredictions = self.__sbi_analysis(sbimodel, 25, coloredFaceFrames)
 
         return self.__extract_analysis(allLipsPredictions, fdaPredictions, dynamicTexturePredictionsBinary, dynamicTexturePredictionsMulti, sbiPredictions)

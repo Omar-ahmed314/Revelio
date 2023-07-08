@@ -56,7 +56,7 @@ class FDA:
 
         for model_name in result_vectors.keys():
             total_voting = np.array(result_vectors[model_name]).sum()
-            voting_result = 1 if total_voting > (frames_size // 2) else 0
+            voting_result = total_voting / frames_size
             votes_vectors[model_name] = voting_result
 
         return votes_vectors

@@ -28,7 +28,7 @@ export const resultsOptions = {
 indexAxis: 'y',
 elements: {
     bar: {
-        inflateAmount: 2,
+        inflateAmount: 10,
         borderRadius: 2
     }
 },
@@ -42,7 +42,7 @@ plugins: {
     },
     title: {
     display: true,
-    text: 'Chart.js Horizontal Bar Chart',
+    text: '',
     },
 },
 };
@@ -50,6 +50,12 @@ plugins: {
 // data we need
 export const options = {
     responsive: true,
+    elements: {
+        bar: {
+            inflateAmount: 10,
+            borderRadius: 2
+        }
+    },
     plugins: {
       legend: {
         position: 'top',
@@ -61,34 +67,16 @@ export const options = {
     },
     scales: {
         y: {
+            min: 0,
+            max: 100,
             ticks: {
-                min: 0,
-                max: 100,
-                // stepSize: 5
-            }
+                stepSize: 50,
+            },
         }
     }
   };
   
-  const labels = ['Deep Fake', 'Face2Face', 'Face Swap', 'Neural Textures'];
-  const fakeData = [50, 40, 5, 20]
-  
-  export const chartData = {
-    labels,
-    datasets: [
-      {
-        label: 'Dataset 1',
-        data: fakeData,
-        barPercentage: 0.5,
-        categoryPercentage: 0.1,
-        borderColor: 'rgb(255, 99, 132)',
-        backgroundColor: (context) => {
-            const value = context.dataset.data[context.dataIndex];
-            return value >= 10 ? 'red' : 'green';},
-        yAxisID: 'y'
-      }
-    ]
-  };
+const labels = ['DeepFake', 'Face2Face', 'FaceSwap', 'Neural Textures'];
 
 
 const Analysis = () => {
@@ -97,26 +85,51 @@ const Analysis = () => {
     const videoFile = useSelector((state) => state.file.value)
     const [videoURL, setVideoURL] = useState('')
     const [resultSign, setResultSign] = useState(0)
-    const [resultMessage, setResultMessage] = useState('Real')
+    const [resultMessage, setResultMessage] = useState('This video might be Fake!')
 
     useEffect(() => {
         const doWork = async () => {
-            const jobId = await getJobID()
-            const data  = await getAnalysis(jobId)
-            readVideoURL(videoFile, (url) => setVideoURL(url))
+            //const jobId = await getJobID()
+            //const data  =  await getAnalysis(jobId)
+            const data = {
+                'LipDFAvg': 0.95,
+                'LipF2FAvg':0.3,
+                'LipFSAvg': 0.1,
+                'LipNTAvg': 0.72,
+    
+                'FDA_DF': 0.89,
+                'FDA_F2F': 0.59,
+                'FDA_FS': 0.2,
+                'FDA_NT': 0.52,
+    
+                'DTBinaryDFAvg': 0.3,
+                'DTBinaryF2FAvg':0.21,
+                'DTBinaryFSAvg':0.41,
+                'DTBinaryNTAvg':0.02,
+                    
+                'SBIAvg': 0.65,   
+            }
+            setTimeout(() => { setAnalyze(false); setData(data); }, 3000);
+            
+    
+            readVideoURL(videoFile, (url) => setVideoURL(url));
         }
         doWork()
     }, [])
 
     const getJobID = async () => {
+
         try {
-            const response = await axios.post(`${config.url}:${config.port}/analyze`,
-            undefined,
+            const response = await axios.get(`${config.url}:${config.port}/analyze`,
             {
                 headers: {
-                        "Content-Type": 'application/json',
-                        'Accept': 'application/json'
-                    }
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                params: {
+                    filename: videoFile.name
+                }
+                
             })
             let jobId = response.data['job_id']
             return jobId
@@ -159,6 +172,54 @@ const Analysis = () => {
         }
     }
 
+    const processData = (chartIndex) => { 
+        const chartData = {
+            labels,
+            datasets: [
+              {
+                label: 'Loading...',
+                data: [0,0,0,0],
+                barPercentage: 0.5,
+                categoryPercentage: 0.1,
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: (context) => {
+                    const value = context.dataset.data[context.dataIndex];
+                    return value >= 50 ? 'red' : 'green';},
+                yAxisID: 'y'
+              }
+            ]
+          };
+          if(isAnalyze) return chartData;
+        switch(chartIndex) {
+            case 0:
+                chartData.datasets[0].label= 'Lips Movement Analysis'
+                chartData.datasets[0].data = [data['LipDFAvg']*100, data['LipF2FAvg']*100, data['LipFSAvg']*100, data['LipNTAvg']*100]
+                return chartData
+            case 1:
+                chartData.datasets[0].label= 'Dynamic Texture Analysis'
+                chartData.datasets[0].data = [data['DTBinaryDFAvg']*100, data['DTBinaryF2FAvg']*100, data['DTBinaryFSAvg']*100, data['DTBinaryNTAvg']*100]
+                return chartData
+            case 2:
+                chartData.datasets[0].label= 'Frequency Domain Analyis'
+                chartData.datasets[0].data = [data['FDA_DF']*100, data['FDA_F2F']*100, data['FDA_FS']*100, data['FDA_NT']*100]
+                return chartData
+            case 3:
+                chartData.datasets[0].label= 'SBI Analysis'
+                chartData.datasets[0].data = [data['SBIAvg']*100]
+                chartData.labels = ['SBI']
+                return chartData
+            case 4:
+                chartData.datasets[0].label= 'Final Result'
+                chartData.labels = ['Lips Movement', 'Dynamic Texture', 'Frequency Domain', 'SBI Analysis']
+                const lipResult = Math.max(data['LipDFAvg'], data['LipF2FAvg'], data['LipFSAvg'], data['LipNTAvg'])
+                const dtResult = Math.max(data['DTBinaryDFAvg'], data['DTBinaryF2FAvg'], data['DTBinaryFSAvg'], data['DTBinaryNTAvg'])
+                const fdResult = Math.max(data['FDA_DF'], data['FDA_F2F'], data['FDA_FS'], data['FDA_NT'])
+                const sbiResult = data['SBIAvg']
+                chartData.datasets[0].data = [lipResult*100, dtResult*100, fdResult*100, sbiResult*100]
+                return chartData
+        }
+    }
+
     return (
         <div className="page-container">
             {isAnalyze ? <div className="analyze-popup-background">
@@ -178,14 +239,14 @@ const Analysis = () => {
                         <div className="final-result">
                             <p>{resultMessage}</p>
                         </div>
-                        <div className="chart"><Bar options={resultsOptions} data={chartData}/></div>
+                        <div className="chart"><Bar options={resultsOptions} data={processData(4)}/></div>
                     </div>
                 </div>
                 <div className="analysis-container">
-                    <div className="chart"><Bar options={options} data={chartData}/></div>
-                    <div className="chart"><Bar options={options} data={chartData}/></div>
-                    <div className="chart"><Bar options={options} data={chartData}/></div>
-                    <div className="chart"><Bar options={options} data={chartData}/></div>
+                    <div className="chart"><Bar options={options} data={processData(0)}/></div>
+                    <div className="chart"><Bar options={options} data={processData(1)}/></div>
+                    <div className="chart"><Bar options={options} data={processData(2)}/></div>
+                    <div className="chart"><Bar options={options} data={processData(3)}/></div>
                 </div>
             </div>
         </div>
