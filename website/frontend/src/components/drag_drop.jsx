@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import '../styles/Drag_Drop.css'
 import config from '../config'
 import axios from 'axios'
+import { useDispatch } from 'react-redux'
+import { add, remove } from '../redux/slices'
 
 const DragAndDrop = ({activateWindow}) => {
     const [isDraged, setDraged] = useState(false)
@@ -12,6 +14,7 @@ const DragAndDrop = ({activateWindow}) => {
     const dragDropArea = useRef(null)
     const fileButton = useRef(null)
     const navigate = useNavigate()
+    const dispatch = useDispatch()
 
     useEffect(() => {
         dragDropArea.current?.addEventListener('dragover', fileDragedOver)
@@ -34,24 +37,24 @@ const DragAndDrop = ({activateWindow}) => {
     const fileDroped = (event) => {
         event.preventDefault()
         const file = event.dataTransfer.files[0]
-        readFileURL(file, (data, fileName) => uploadFile(data, fileName))
+        readFileBuffer(file, (data, file) => uploadFile(data, file))
     }
 
     const fileChosen = (event) => {
         event.preventDefault()
         const file = event.target.files[0]
-        readFileURL(file, (data, fileName) => uploadFile(data, fileName))
+        readFileBuffer(file, (data, file) => uploadFile(data, file))
     }
 
-    const readFileURL = (file, callback) => {
+    const readFileBuffer = (file, callback) => {
         const fileReader = new FileReader()
         fileReader.onload = () => {
-            callback(fileReader.result, file.name)
+            callback(fileReader.result, file)
         }
         fileReader.readAsArrayBuffer(file)
     }
 
-    const uploadFile = async (fileArrayBuffer, fileName) => {
+    const uploadFile = async (fileArrayBuffer, file) => {
         setLoading(true)
         const fileSize = fileArrayBuffer.byteLength
         const CHUNK_SIZE = 1024 * 100
@@ -68,7 +71,7 @@ const DragAndDrop = ({activateWindow}) => {
                 currentChunk,
                 {
                     headers: {'Content-Type': 'application/octet-stream',
-                                'File-Name': fileName}
+                                'File-Name': file.name}
                 })
                 
                 // if success call on progress callback function
@@ -80,6 +83,9 @@ const DragAndDrop = ({activateWindow}) => {
 
             }
         }
+
+        // send store the file into redux store
+        dispatch(add(file))
 
         // after finishing uploading the file
         // navigate to the analysis page

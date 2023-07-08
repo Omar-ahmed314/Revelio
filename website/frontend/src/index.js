@@ -5,16 +5,20 @@ import './index.css';
 import Home from './pages/Home';
 import reportWebVitals from './reportWebVitals';
 import Analysis from './pages/Analysis';
+import { Provider } from 'react-redux';
+import store from './redux/store'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route exact path='/' element={<Home/>}/>
-        <Route path='/analyze' element={<Analysis/>}/>
-      </Routes>
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <Routes>
+          <Route exact path='/' element={<Home/>}/>
+          <Route path='/analyze' element={<Analysis/>}/>
+        </Routes>
+      </BrowserRouter>
+    </Provider>
   </React.StrictMode>
 );
 
