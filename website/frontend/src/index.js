@@ -10,16 +10,14 @@ import store from './redux/store'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
     <Provider store={store}>
       <BrowserRouter>
         <Routes>
           <Route exact path='/' element={<Home/>}/>
-          <Route path='/analyze' element={<Analysis/>}/>
+          <Route path='/analysis' element={<Analysis/>}/>
         </Routes>
       </BrowserRouter>
     </Provider>
-  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

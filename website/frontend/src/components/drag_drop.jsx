@@ -89,7 +89,7 @@ const DragAndDrop = ({activateWindow}) => {
 
         // after finishing uploading the file
         // navigate to the analysis page
-        navigate('/analyze')
+        navigate('/analysis')
     }
 
     return (

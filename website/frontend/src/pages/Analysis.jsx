@@ -78,7 +78,7 @@ export const options = {
   
 const labels = ['DeepFake', 'Face2Face', 'FaceSwap', 'Neural Textures'];
 
-
+let a = 1
 const Analysis = () => {
     const [isAnalyze, setAnalyze] = useState(true)
     const [data, setData] = useState({})
@@ -89,27 +89,27 @@ const Analysis = () => {
 
     useEffect(() => {
         const doWork = async () => {
-            //const jobId = await getJobID()
-            //const data  =  await getAnalysis(jobId)
-            const data = {
-                'LipDFAvg': 0.95,
-                'LipF2FAvg':0.3,
-                'LipFSAvg': 0.1,
-                'LipNTAvg': 0.72,
+            const jobId = await getJobID()
+            const data  =  await getAnalysis(jobId)
+            // const data = {
+            //     'LipDFAvg': 0.95,
+            //     'LipF2FAvg':0.3,
+            //     'LipFSAvg': 0.1,
+            //     'LipNTAvg': 0.72,
     
-                'FDA_DF': 0.89,
-                'FDA_F2F': 0.59,
-                'FDA_FS': 0.2,
-                'FDA_NT': 0.52,
+            //     'FDA_DF': 0.89,
+            //     'FDA_F2F': 0.59,
+            //     'FDA_FS': 0.2,
+            //     'FDA_NT': 0.52,
     
-                'DTBinaryDFAvg': 0.3,
-                'DTBinaryF2FAvg':0.21,
-                'DTBinaryFSAvg':0.41,
-                'DTBinaryNTAvg':0.02,
+            //     'DTBinaryDFAvg': 0.3,
+            //     'DTBinaryF2FAvg':0.21,
+            //     'DTBinaryFSAvg':0.41,
+            //     'DTBinaryNTAvg':0.02,
                     
-                'SBIAvg': 0.65,   
-            }
-            setTimeout(() => { setAnalyze(false); setData(data); }, 3000);
+            //     'SBIAvg': 0.65,   
+            // }
+            // setTimeout(() => { setAnalyze(false); setData(data); }, 3000);
             
     
             readVideoURL(videoFile, (url) => setVideoURL(url));
@@ -118,7 +118,7 @@ const Analysis = () => {
     }, [])
 
     const getJobID = async () => {
-
+        console.log('here we start the job')
         try {
             const response = await axios.get(`${config.url}:${config.port}/analyze`,
             {
@@ -139,7 +139,6 @@ const Analysis = () => {
     const readVideoURL = (file, callback) => {
         const fileReader = new FileReader()
         fileReader.onload = () => {
-            console.log(fileReader.result)
             callback(fileReader.result)
         }
         fileReader.readAsDataURL(file)
