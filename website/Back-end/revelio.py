@@ -141,6 +141,12 @@ class Revelio():
             'SBI': sbiPredictions,
             'SBIAvg': np.average(sbiPredictions)   
         }
+        #Convert every float 32 value to regular float
+        for key in resultmap:
+            if type(resultmap[key]) == list:
+                resultmap[key] = [float(x) for x in resultmap[key]]
+            else:
+                resultmap[key] = float(resultmap[key])
         return json.dumps(resultmap)
 
     def analyze_video(self, filename):
