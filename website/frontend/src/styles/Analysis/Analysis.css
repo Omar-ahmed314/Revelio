@@ -4,7 +4,7 @@
     display: flex;
     flex-direction: column;
     overflow: auto;
-    /* background-image: radial-gradient(rgba(255, 255, 255, 0.477) 2%, transparent); */
+    background-image: radial-gradient(rgba(3, 188, 126, 0.107) 2%, transparent);
 }
 
 a {
@@ -16,7 +16,7 @@ a {
 }
 
 a:hover {
-    color: aqua;
+    color: #00ffff;
 }
 
 /* toolbar */
@@ -44,13 +44,13 @@ a:hover {
 .analyze-popup-background .analyze-popup-window {
     width: 0;
     padding: 4%;
-    border: 2px solid aquamarine;
+    border: 2px solid rgb(127, 255, 212);
     border-radius: 10px;
     background-color: var(--background-color);
     display: flex;
     justify-content: center;
     align-items: center;
-    animation: analyze-windown-popup 500ms ease-in-out forwards;
+    animation: analyze-window-popup 500ms ease-in-out forwards;
 }
 
 .analyze-popup-background .analyze-popup-window span {
@@ -60,7 +60,7 @@ a:hover {
     animation: loading 500ms ease-in infinite alternate;
 }
 
-@keyframes analyze-windown-popup {
+@keyframes analyze-window-popup {
     to {
         width: 25%;
     }
@@ -98,26 +98,38 @@ a:hover {
 .video-container {
     width: 100%;
     height: 50%;
-    flex-grow: 2;
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
+    /* background-color: #00ffff; */
 }
 
 .video-container video {
     width: 70%;
+    /* height: 100%; */
 }
 
 /* analysis container */
 .analysis-container {
+    padding: 2%;
     display: grid;
     grid-area: analysis;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, 1fr);
+    /* background-color: #ddd; */
 }
 
 .analysis-container .chart {
     width: 100%;
+    height: 100%;
+    padding: 4%;
+    /* background-color: aquamarine; */
+}
+
+.analysis-container .chart canvas {
+    width: 100%;
+    /* background-image: linear-gradient(rgba(127, 255, 212, 0.334), transparent); */
 }
 
 /* result container */
@@ -125,16 +137,39 @@ a:hover {
     width: 100%;
     height: 50%;
     display: flex;
-    padding-left: 15%;
+    padding: 0 10% 10% 10%;
     flex-direction: column;
+    /* background-color: aquamarine; */
 }
 
 .result-container .chart {
-    width: 70%;
+    width: 100%;
+    height: 100%;
+    /* background-color: blueviolet; */
 }
 
 .result-container .final-result {
+    margin-left: 20%;
     padding: 2%;
     color: white;
     font-family: 'Orbitron';
+    /* background-color: bisque; */
+}
+
+.result-container .final-result.FAKE {
+    background-image: linear-gradient(90deg, rgba(255, 0, 0, 0.499), transparent);
+    border-left: 8px solid red;
+    /* border-left: 2px solid red; */
+}
+
+.result-container .final-result.REAL {
+    background-image: linear-gradient(90deg, rgba(0, 255, 76, 0.499), transparent);
+    /* background-color: rgba(0, 255, 76, 0.499); */
+    border-left: 8px solid rgb(9, 255, 0);
+}
+
+.result-container .final-result.SUSPICIOUS {
+    background-image: linear-gradient(90deg, rgba(255, 238, 0, 0.499), transparent);
+    /* background-color: rgba(255, 238, 0, 0.499); */
+    border-left: 8px solid rgb(255, 234, 0);
 }
