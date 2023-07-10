@@ -87,7 +87,7 @@ const getOptions = (chartTitle) => {
                 min: 0,
                 max: 100,
                 ticks: {
-                    stepSize: 5,
+                    stepSize: 25,
                     color: 'rgb(127, 255, 212)'
                 },
                 grid: {
