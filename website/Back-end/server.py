@@ -16,6 +16,7 @@ from enum import Enum
 import json
 from threading import Thread
 from revelio import *
+import os
 
 
 class JobsStatus(Enum):
@@ -82,8 +83,11 @@ def run_process(job_id, filename):
     revelioAnalysis = Revelio().analyze_video(filename)
     # time.sleep(5)
     print(" ================== End job ===================== ")
+    # Mark the job id as done then copy the results into
+    # job id state, finally delete the video file
     current_jobs[job_id] = JobsStatus.FINISHED
     current_jobs_results[job_id] = revelioAnalysis
+    os.remove(filename)
 
 
 if __name__ == "__main__":

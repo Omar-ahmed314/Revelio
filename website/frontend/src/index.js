@@ -7,6 +7,7 @@ import reportWebVitals from './reportWebVitals';
 import Analysis from './pages/Analysis';
 import { Provider } from 'react-redux';
 import store from './redux/store'
+import AboutUs from './pages/AboutUs';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -15,6 +16,7 @@ root.render(
         <Routes>
           <Route exact path='/' element={<Home/>}/>
           <Route path='/analysis' element={<Analysis/>}/>
+          <Route path='/aboutus' element={<AboutUs/>}/>
         </Routes>
       </BrowserRouter>
     </Provider>

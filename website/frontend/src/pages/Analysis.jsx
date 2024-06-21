@@ -1,16 +1,18 @@
 import '../styles/Analysis/Analysis.css'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import config from '../config'
 import Video from '../components/video'
 import Result from '../components/Result'
 import AnalysisComp from '../components/AnalysisComp'
+import Toolbar from '../components/Toolbar'
 
    
 const Analysis = () => {
     const [isAnalyze, setAnalyze] = useState(true)
     const [data, setData] = useState({})
+    const [isResultsActive, setIsResultsActive] = useState(true) 
     const videoFile = useSelector((state) => state.file.value)
 
     useEffect(() => {
@@ -75,17 +77,17 @@ const Analysis = () => {
                     <span>ANALYZING</span>
                 </div>
             </div> : undefined}
-            <div className="toolbar">
-                <a href="/">BACK</a>
-            </div>
+            <Toolbar/>
             <div className="page-body">
                 {!isAnalyze ? 
                 <>
-                    <div className="video-result-container">
-                        <Video/>
+                    <Video/>
+                    <span className="expander" onClick={() => setIsResultsActive(!isResultsActive)}>❮</span>
+                    <div 
+                    className={`results-container ${isResultsActive ? null : 'active'}`}>
                         <Result data={data}/>
+                        <AnalysisComp data={data}/>
                     </div>
-                    <AnalysisComp data={data}/>
                 </> : undefined}
                 
             </div>

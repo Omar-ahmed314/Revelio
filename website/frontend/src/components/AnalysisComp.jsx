@@ -9,6 +9,7 @@ import {
     Title,
     Tooltip,
     Legend,
+    defaults
   } from 'chart.js';
 
   ChartJS.register(

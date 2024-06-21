@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import '../styles/Home/Home.css'
 import DragAndDrop from '../components/drag_drop'
+import config from '../config'
 
 const Home = () => {
     const [isPopupActive, setPopupActive] = useState(false)
@@ -12,9 +13,9 @@ const Home = () => {
             <section className="page_content">
                 <section className="page_header">
                     <ul>
-                        <li><a href="/">ABOUT US</a></li>
+                        <li><a href="/aboutus">ABOUT US</a></li>
                         <li><a href="/">DOCS</a></li>
-                        <li><a href="/">GITHUB</a></li>
+                        <li><a href={config.github} target='_blank'>GITHUB</a></li>
                     </ul>
                 </section>
                 <section className="intro_words">
