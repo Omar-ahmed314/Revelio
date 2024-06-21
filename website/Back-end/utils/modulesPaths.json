@@ -1,0 +1,8 @@
+{
+    "LandmarksDetectorModulePath": "../../Facial-Landmarks-Detector/",
+    "LipsMovementModulePath": "../../Revelio-LipsMovement/",
+    "DynamicTextureModulePath": "../../Dynamic-texture-analysis-for-detecting-fake-faces-in-video-sequences/",
+    "DFTModulePath": "../../Modules/dft/lib/",
+    "SBI2ModulePath": "../../SBI2/",
+    "FaceDetectionModulePath": "../../FaceDetection/"
+}

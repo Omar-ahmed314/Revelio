@@ -1,0 +1,12 @@
+.flex-box {
+    display: flex;
+    /* height: 100%; */
+    /* background-color: aliceblue; */
+    /* justify-content: space-around; */
+}
+
+.flex-box section {
+    /* width: 50%; */
+    /* height: 100%; */
+    flex: 1
+}

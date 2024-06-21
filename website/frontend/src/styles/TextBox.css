@@ -1,0 +1,15 @@
+.text-container {
+    font-family: 'Orbitron';
+    color: white;
+    border-radius: 10px;
+    padding: 2%;
+    height: 100%;
+    line-height: 1.5;
+    background-color: rgba(52, 205, 239, 0.068);
+    box-shadow: 0px 0px 10px rgb(75, 126, 130) inset;
+}
+
+.text-container h1 {
+    color: aquamarine
+    
+}

@@ -1,0 +1,152 @@
+/* popup window */
+.popup_window {
+    background-color: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 200;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dragdrop_container {
+    background-color:aquamarine;
+    width: 0;
+    height: var(--popup-window-height);
+    padding: 0.1%;
+    /* box-shadow: 0 0 100px 1px aquamarine; */
+    animation: popup 1s ease forwards;
+    clip-path: polygon(0 0, 
+    50% 0, 
+    55% 2%, 
+    80% 2%,
+    100% 22%, 
+    100% 30%, 
+    98% 35%, 
+    98% 70%, 
+    100% 75%, 
+    100% 100%, 
+    75% 100%, 
+    70% 98%, 
+    35% 98%, 
+    30% 100%,
+    0 100%,
+    0 75%,
+    2% 70%,
+    2% 35%, 
+    0 30%);
+}
+
+.dragdrop_container .dragdrop_inner_container {
+    background-color: var(--background-color);
+    width: 100%;
+    height: 100%;
+    clip-path: polygon(0 0, 
+    50% 0, 
+    55% 2%, 
+    80% 2%,
+    100% 22%, 
+    100% 30%, 
+    98% 35%, 
+    98% 70%, 
+    100% 75%, 
+    100% 100%, 
+    75% 100%, 
+    70% 98%, 
+    35% 98%, 
+    30% 100%,
+    0 100%,
+    0 75%,
+    2% 70%,
+    2% 35%, 
+    0 30%);
+}
+
+@keyframes popup {
+    to {
+        width: var(--popup-window-width);
+    }
+}
+
+/* close btn */
+.close_btn {
+    margin: 1%;
+    outline: none;
+    color: aquamarine;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.dragdrop_container .close_btn_container button::before {
+    content: '✖';
+    font-size: larger;
+}
+
+.dragdrop_container .close_btn_container button:hover {
+    animation: rotate 500ms ease forwards
+}
+
+@keyframes rotate {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* drag and drop */
+.dragdrop {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dragdrop p {
+    color: white;
+    font-family: 'Orbitron';
+}
+
+.dragdrop p label {
+    color: aquamarine
+}
+
+.dragdrop_container .drag_over {
+    background-color: rgb(24, 58, 47);
+    /* color: brown; */
+}
+
+/* loading container */
+.loading_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    /* background-color: aquamarine; */
+    width: 50%;
+}
+
+.loading_container span {
+    margin: 2%;
+    color: aquamarine;
+    font-family: 'Orbitron';
+    animation: loading 1s ease-in infinite;
+}
+
+.loading_container progress {
+    width: 100%;
+    /* background-color: aquamarine; */
+}
+
+@keyframes loading {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
