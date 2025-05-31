@@ -3,3 +3,6 @@
 *.npz
 *.pyc
 *.joblib
+*.pkl
+*.ipynb_checkpoints
+__pycache__/
