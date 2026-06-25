@@ -32,7 +32,7 @@ We provide an easy-to-use website for users to submit their videos for analysis 
 
 ![Fake](/screenshots/github/fakek.png)
 
-### Suspicios Video
+### Suspicious Video
 
 ![Fake](/screenshots/github/suspicious.png)
 
